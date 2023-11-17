@@ -1,6 +1,6 @@
 package taras.du.data.cache
 
-import taras.du.bluetooth.model.data.DeviceData
+import taras.du.bluetooth.model.data.DeviceDataModel
 import taras.du.data.data_sourse.database.TickDao
 import javax.inject.Inject
 
@@ -10,7 +10,7 @@ class DataCache @Inject constructor(
 
     private val TAG = "DataCache"
 
-    override suspend fun cacheReceivedData(deviceData: DeviceData) {
+    override suspend fun cacheReceivedData(deviceDataModel: DeviceDataModel) {
         TODO("Not yet implemented")
     }
 

@@ -26,7 +26,7 @@ import taras.du.bluetooth.model.BluetoothException
 import taras.du.bluetooth.model.BluetoothOtherException
 import taras.du.bluetooth.model.BluetoothPermissionNotGrantedException
 import taras.du.bluetooth.model.SendingDataResult
-import taras.du.bluetooth.model.data.DeviceData
+import taras.du.bluetooth.model.data.DeviceDataModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.jvm.Throws
@@ -52,7 +52,7 @@ class AppBluetoothService @Inject constructor(
         uuid = null
     }
 
-    private val _receivedData = MutableSharedFlow<DeviceData>()
+    private val _receivedData = MutableSharedFlow<DeviceDataModel>()
     private val eventObserver: BluetoothEventObserver
 
 
@@ -119,7 +119,7 @@ class AppBluetoothService @Inject constructor(
     }
 
 
-    override suspend fun sendData(data: DeviceData) = callbackFlow {
+    override suspend fun sendData(data: DeviceDataModel) = callbackFlow {
         try {
             checkBluetoothExceptions()
 
@@ -138,7 +138,7 @@ class AppBluetoothService @Inject constructor(
         }
     }
 
-    override fun receivedData(): SharedFlow<DeviceData> {
+    override fun receivedData(): SharedFlow<DeviceDataModel> {
         return _receivedData.shareIn(
             scope = CoroutineScope(Dispatchers.Default),
             started = SharingStarted.WhileSubscribed()

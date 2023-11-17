@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import taras.du.bluetooth.model.data.DeviceData
+import taras.du.bluetooth.model.data.DeviceDataModel
 
 interface BluetoothEventObserver {
-    fun receivedData(): SharedFlow<DeviceData>
+    fun receivedData(): SharedFlow<DeviceDataModel>
     fun connectionStatus(): StateFlow<BluetoothStatus>
 }
 
@@ -25,13 +25,13 @@ class BluetoothEventObserverImpl(service: BluetoothService): BluetoothEventObser
 
     private val TAG = "BluetoothEventObserver"
 
-    private val _receivedData: MutableSharedFlow<DeviceData> = MutableSharedFlow()
+    private val _receivedData: MutableSharedFlow<DeviceDataModel> = MutableSharedFlow()
     private val _connectionStatus: MutableStateFlow<BluetoothStatus> = MutableStateFlow(BluetoothStatus.NONE)
 
     private val eventCallback = object : BluetoothService.OnBluetoothEventCallback {
         override fun onDataRead(buffer: ByteArray?, length: Int) {
             buffer?.let {
-                val receivedData = DeviceData.convert(buffer)
+                val receivedData = DeviceDataModel.convert(buffer)
                 receivedData?.let {
                     logReceivedData()
                     _receivedData.tryEmit(it)
@@ -63,7 +63,7 @@ class BluetoothEventObserverImpl(service: BluetoothService): BluetoothEventObser
         service.setOnEventCallback(eventCallback)
     }
 
-    override fun receivedData(): SharedFlow<DeviceData> {
+    override fun receivedData(): SharedFlow<DeviceDataModel> {
         return _receivedData
             .onEach { Log.d(TAG, "RECEIVED DATA: ${it.toString()}") }
             .shareIn(
