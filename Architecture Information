@@ -1,0 +1,15 @@
+DATA
+ - Keep all the external dependency-related code as to HOW they are implemented:
+ - Repository implementations, DataSource interfaces and entities.
+ - Entity represents a single instance of your domain object saved into the database as a record.
+
+
+DOMAIN
+ - WHAT your project/application does.
+ - Models, repository interfaces(without implementation!), and use cases.
+
+
+
+
+PRESENTATION
+BLUETOOTH
