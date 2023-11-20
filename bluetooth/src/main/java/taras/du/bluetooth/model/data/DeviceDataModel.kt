@@ -1,16 +1,29 @@
 package taras.du.bluetooth.model.data
 
 import taras.du.domain.model.device.Parameter
-import taras.du.domain.model.device.Value
 
 
-data class DeviceDataModel(
-    val type: HeaderType,
-    val params: Map<Parameter, Value?>
-) {
+class DeviceDataModel constructor(val parameters: Map<Parameter, String>) {
+
+    constructor(parameters: Set<Parameter>) : this(parameters.associateWith { "" })
+
+    constructor(data: String): this(convertStringDataToMap(data))
 
 
-    fun parametersToString(): String = params.toList().joinToString() {
+    companion object {
+        private fun convertStringDataToMap(data: String): Map<Parameter, String> {
+            val content = data.substringAfterLast(":").trim(':')
+            return content.split(",").associate { parameterValue ->
+                val parameterCode = parameterValue.substringBefore("=").trim('=')
+                val value = parameterValue.substringAfter("=").trim('=')
+                Pair(Parameter.getByCode(parameterCode), value)
+            }
+        }
+    }
+
+
+
+    /*fun parametersToString(): String = params.toList().joinToString() {
         val builder = StringBuilder(it.first.code)
         it.second?.let { value ->
             builder.append("=").append(value.toString())
@@ -69,6 +82,6 @@ data class DeviceDataModel(
 
         }
 
-    }
+    }*/
 
 }

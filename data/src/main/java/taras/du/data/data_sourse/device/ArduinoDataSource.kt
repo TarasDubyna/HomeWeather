@@ -1,9 +1,18 @@
 package taras.du.data.data_sourse.device
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import taras.du.bluetooth.model.data.DeviceDataModel
 import taras.du.bluetooth.service.ArduinoCommunication
 import taras.du.data.data_sourse.database.TickEntity
+import taras.du.data.model.device.RequestDataModel
 import taras.du.domain.model.device.ArduinoSettings
 import taras.du.domain.model.device.Parameter
 import java.util.Date
@@ -15,9 +24,22 @@ class ArduinoDataSource @Inject constructor(
 ): ArduinoAPI {
 
 
-    override suspend fun getDeviceSettings(): Flow<ArduinoSettings> {
-        val sendingMap = mutableListOf<Parameter>(Parameter.TIME,Parameter.STORAGE_FREE, Parameter.STORAGE_TOTAL,  Parameter.FREQUENCY)
-        dataSender.sendData()
+    override suspend fun getDeviceSettings(): Flow<ArduinoSettings> = callbackFlow {
+        val parameters = mutableSetOf(
+            Parameter.TIME,
+            Parameter.STORAGE_FREE,
+            Parameter.STORAGE_TOTAL,
+            Parameter.FREQUENCY
+        )
+
+        dataSender.receivedData().first { it.parameters.keys.containsAll(parameters) }.let {
+            it
+            trySend()
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            dataSender.sendData(DeviceDataModel(parameters))
+        }
     }
 
     override suspend fun setDeviceTime(time: Date) {

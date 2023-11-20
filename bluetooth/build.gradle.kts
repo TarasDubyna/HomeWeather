@@ -37,6 +37,7 @@ android {
 dependencies {
 
     implementation(project(mapOf("path" to ":domain")))
+    implementation(project(mapOf("path" to ":data")))
     val bluetooth_version = "0.3.5"
     val hilt_version = "2.48.1"
 

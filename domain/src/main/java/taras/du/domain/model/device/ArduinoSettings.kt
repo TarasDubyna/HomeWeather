@@ -7,5 +7,10 @@ data class ArduinoSettings(
     val deviceTime: Date,
     val measurementFrequency: Duration,
     val sdCardFreeSpace: Long,
-    val sdCardTotalSpace: Long
+    val sdCardTotalSpace: Long;
+
+    companion object {
+
+    }
+
 )
