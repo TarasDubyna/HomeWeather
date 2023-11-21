@@ -15,8 +15,7 @@ import taras.du.domain.model.device.Parameter
     }
 }*/
 
-const val GET_HEADER_NAME = "get"
-const val SET_HEADER_NAME = "set"
+
 
 sealed class RequestDataModel {
 

@@ -3,16 +3,13 @@ package taras.du.data.data_sourse.device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import taras.du.bluetooth.model.data.DeviceDataModel
 import taras.du.bluetooth.service.ArduinoCommunication
 import taras.du.data.data_sourse.database.TickEntity
-import taras.du.data.model.device.RequestDataModel
 import taras.du.domain.model.device.ArduinoSettings
 import taras.du.domain.model.device.Parameter
 import java.util.Date

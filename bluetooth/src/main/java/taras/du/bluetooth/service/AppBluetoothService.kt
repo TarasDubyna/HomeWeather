@@ -127,6 +127,38 @@ class AppBluetoothService @Inject constructor(
             writer.writeln(data.toString())
 
             Log.d(TAG, "sendData: SUCCESSFUL: <${data.toString()}>")
+
+            val callback = object : BluetoothService.OnBluetoothEventCallback {
+                override fun onDataRead(buffer: ByteArray?, length: Int) {
+                    buffer?.let {
+                        val message = String(it)
+                        val receivedData = DeviceDataModel(message)
+                        if (receivedData.parameters.keys.containsAll(data.parameters.keys)) {
+                            Log.d(TAG, "sendData: RESPONSE: ${receivedData.toString()}")
+                            trySend(receivedData)
+                        }
+                    }
+                }
+
+                override fun onStatusChange(status: BluetoothStatus?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onDeviceName(deviceName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onToast(message: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onDataWrite(buffer: ByteArray?) {
+                    TODO("Not yet implemented")
+                }
+
+            }
+            BluetoothService.getDefaultInstance().setOnEventCallback(callback)
+
             trySend(SendingDataResult.Successful)
 
         } catch (e: BluetoothException) {

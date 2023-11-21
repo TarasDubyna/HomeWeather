@@ -1,87 +1,81 @@
 package taras.du.bluetooth.model.data
 
+import taras.du.data.model.DataType
 import taras.du.domain.model.device.Parameter
 
+const val GET_HEADER_NAME = "get"
+const val SET_HEADER_NAME = "set"
 
-class DeviceDataModel constructor(val parameters: Map<Parameter, String>) {
+class DeviceDataModel constructor(
+    val dataType: DataType,
+    val parameters: Map<Parameter, String>
+) {
 
-    constructor(parameters: Set<Parameter>) : this(parameters.associateWith { "" })
 
-    constructor(data: String): this(convertStringDataToMap(data))
+    constructor(parameters: Map<Parameter, String>) : this(DataType.SET, parameters)
+    constructor(parameters: Set<Parameter>) : this(DataType.GET, parameters.associateWith { "" })
+    constructor(receivedMessage: String) : this(parseDataType(receivedMessage), parseParameters(receivedMessage))
 
-
-    companion object {
-        private fun convertStringDataToMap(data: String): Map<Parameter, String> {
-            val content = data.substringAfterLast(":").trim(':')
-            return content.split(",").associate { parameterValue ->
-                val parameterCode = parameterValue.substringBefore("=").trim('=')
-                val value = parameterValue.substringAfter("=").trim('=')
-                Pair(Parameter.getByCode(parameterCode), value)
+    fun getRequestMessage(): String {
+        val builder = StringBuilder(dataType.type).append(":")
+        val parametersString = parameters.toList().joinToString {
+            val paramValueBuilder = StringBuilder(it.first.shortName)
+            it.second.isNotEmpty().let { value ->
+                paramValueBuilder.append("=").append(value)
             }
+            paramValueBuilder.toString()
         }
+        builder.append(parametersString)
+        return builder.toString()
     }
-
-
-
-    /*fun parametersToString(): String = params.toList().joinToString() {
-        val builder = StringBuilder(it.first.code)
-        it.second?.let { value ->
-            builder.append("=").append(value.toString())
-        }
-        builder.toString()
-    }
-
-    override fun toString(): String = StringBuilder(type.shorName)
-        .append(":")
-        .append(params.toList().joinToString(separator = ",") {
-            "${it.first}=${it.second}"
-        }
-        )
-        .toString()
 
     companion object {
 
-        fun convert(buffer: ByteArray?): DeviceDataModel? {
-            return buffer?.let { buf ->
-                val message = String(buf)
-                val sHeader = message.substringBefore(":").trim(':')
-                val sContent = message.substringAfterLast(":").trim(':')
+        fun parseReceivedMessage(message: String): DeviceDataModel {
+            val dataType = parseDataType(message)
+            val content = message.substringAfter(":").trim(':')
+            val parameters = parseParameters(content)
+            return DeviceDataModel(dataType, parameters)
+        }
 
-                val headerType = HeaderType.getByShortName(sHeader) ?: return null
+        private fun parseDataType(receivedMessage: String): DataType {
+            val sDataType = receivedMessage.substringBefore(":").trim(':')
+            return enumValues<DataType>().firstOrNull { it.type == sDataType } ?: DataType.UNKNOWN
+        }
 
-                val paramValueMap = mutableMapOf<taras.du.domain.model.Param, ParamValue>()
-                sContent.split(",", ignoreCase = true).forEach {
-                    val value = ParamValue(it.substringAfterLast("=").trim('='))
-                    taras.du.domain.model.Param.getByShortName(it.substringBefore("=").trim('='))
-                        ?.let { param ->
-                            paramValueMap[param] = value
+
+        private fun parseParameters(receivedMessage: String): Map<Parameter, String> {
+            val parameters = mutableMapOf<Parameter, String>()
+            receivedMessage.substringAfter(":").trim(':').split(",")
+                .forEach { sParamValue ->
+                    val split = sParamValue.split("=")
+                    split.firstOrNull()?.let {  sParam ->
+                        Parameter.getByShortName(sParam)?.let { param ->
+                            val value = split.lastOrNull() ?: ""
+                            parameters[param] = value
                         }
-
+                    }
                 }
-                DeviceDataModel(headerType, paramValueMap)
-            }
-
-
+            return parameters
         }
+
+/*
+        private fun parseParameters(content: String): Map<Parameter, String> {
+            val parameters = mutableMapOf<Parameter, String>()
+            content.split(",")
+                .forEach { sParamValue ->
+                    val split = sParamValue.split("=")
+                    split.firstOrNull()?.let {  sParam ->
+                        Parameter.getByShortName(sParam)?.let { param ->
+                            val value = split.lastOrNull() ?: ""
+                            parameters[param] = value
+                        }
+                    }
+                }
+            return parameters
+        }*/
+
 
     }
-
-    enum class HeaderType(val shorName: String) {
-
-        GET("get"),
-        SET("set"),
-        TICKS("ticks");
-
-        override fun toString(): String {
-            return this.name.lowercase()
-        }
-
-        companion object {
-            fun getByShortName(shorName: String): HeaderType? =
-                enumValues<HeaderType>().firstOrNull { it.shorName == shorName }
-
-        }
-
-    }*/
 
 }
