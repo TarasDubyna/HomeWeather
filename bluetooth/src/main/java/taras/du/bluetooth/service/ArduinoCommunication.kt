@@ -6,6 +6,6 @@ import taras.du.bluetooth.model.SendingDataResult
 import taras.du.bluetooth.model.data.DeviceDataModel
 
 interface ArduinoCommunication {
-    suspend fun sendData(request): Flow<SendingDataResult>
+    suspend fun sendData(sendingData: DeviceDataModel): Flow<SendingDataResult>
     fun receivedData(): SharedFlow<DeviceDataModel>
 }

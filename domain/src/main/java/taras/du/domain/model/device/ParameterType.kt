@@ -1,6 +1,6 @@
 package taras.du.domain.model.device
 
-enum class Parameter(val shortName: String){
+enum class ParameterType(val shortName: String){
     TIMESTAMP("ts"),
     DEVICE_TIME("time"),
     SD_TOTAL_SPACE("sd_total"),
@@ -19,9 +19,8 @@ enum class Parameter(val shortName: String){
     CO2("co");
 
     companion object {
-        fun getByShortName(shortName: String): Parameter? =
-            enumValues<Parameter>().firstOrNull { it.shortName == shortName }
-
+        fun getByShortName(shortName: String): ParameterType? =
+            enumValues<ParameterType>().firstOrNull { it.shortName == shortName }
     }
 
 }

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import taras.du.bluetooth.BluetoothUtil
 import taras.du.bluetooth.model.BluetoothNotEnabledException
 import taras.du.bluetooth.model.BluetoothDeviceNotConnectedException
@@ -119,47 +120,44 @@ class AppBluetoothService @Inject constructor(
     }
 
 
-    override suspend fun sendData(data: DeviceDataModel) = callbackFlow {
+    override suspend fun sendData(sendingData: DeviceDataModel) = callbackFlow<SendingDataResult> {
         try {
             checkBluetoothExceptions()
 
-            val writer = BluetoothWriter(BluetoothService.getDefaultInstance())
-            writer.writeln(data.toString())
+            val message = sendingData.getRequestMessage()
+            launch(Dispatchers.IO) {
+                BluetoothWriter(BluetoothService.getDefaultInstance()).writeln(message)
+            }
 
-            Log.d(TAG, "sendData: SUCCESSFUL: <${data.toString()}>")
+            Log.d(TAG, "sendData: SUCCESSFUL: <$message>")
 
             val callback = object : BluetoothService.OnBluetoothEventCallback {
                 override fun onDataRead(buffer: ByteArray?, length: Int) {
-                    buffer?.let {
-                        val message = String(it)
-                        val receivedData = DeviceDataModel(message)
-                        if (receivedData.parameters.keys.containsAll(data.parameters.keys)) {
-                            Log.d(TAG, "sendData: RESPONSE: ${receivedData.toString()}")
-                            trySend(receivedData)
+                    buffer?.let {buf ->
+                        val receivedMessage = String(buf)
+                        val receivedData = DeviceDataModel(receivedMessage)
+
+                        val isResponseContainsParameters = receivedData.parameters.all { param ->
+                            sendingData.parameters.map { it.type }.contains(param.type)
+                        }
+
+                        if (isResponseContainsParameters) {
+                            Log.d(TAG, "sendData: RESPONSE: $receivedMessage")
+                            trySend(SendingDataResult.Successful(receivedData))
                         }
                     }
                 }
 
-                override fun onStatusChange(status: BluetoothStatus?) {
-                    TODO("Not yet implemented")
-                }
+                override fun onStatusChange(status: BluetoothStatus?) {}
 
-                override fun onDeviceName(deviceName: String?) {
-                    TODO("Not yet implemented")
-                }
+                override fun onDeviceName(deviceName: String?) {}
 
-                override fun onToast(message: String?) {
-                    TODO("Not yet implemented")
-                }
+                override fun onToast(message: String?) {}
 
-                override fun onDataWrite(buffer: ByteArray?) {
-                    TODO("Not yet implemented")
-                }
+                override fun onDataWrite(buffer: ByteArray?) {}
 
             }
             BluetoothService.getDefaultInstance().setOnEventCallback(callback)
-
-            trySend(SendingDataResult.Successful)
 
         } catch (e: BluetoothException) {
             Log.e(TAG, "sendData: FAILED: Bluetooth exception - ${e.message}")
@@ -183,35 +181,6 @@ class AppBluetoothService @Inject constructor(
         if (!BluetoothUtil.isPermissionsGranted(appContext)) throw BluetoothPermissionNotGrantedException()
         if (BluetoothService.getDefaultInstance().status != BluetoothStatus.CONNECTED) throw BluetoothDeviceNotConnectedException()
     }
-
-
-    /*override fun startScanning(): Flow<ScanResult> = callbackFlow {
-        BluetoothService.getDefaultInstance()
-            .setOnScanCallback(object : BluetoothService.OnBluetoothScanCallback {
-                override fun onDeviceDiscovered(device: BluetoothDevice?, rssi: Int) {
-                    device?.let {
-                        Log.d(TAG, "Scanning: onDeviceDiscovered: ${it.getInfo()}")
-                        trySend(ScanResult.FoundDevices(mutableSetOf(it)))
-                    }
-                }
-
-                override fun onStartScan() {
-                    Log.d(TAG, "Scanning: onStartScan: ")
-                    trySend(ScanResult.Started)
-                }
-
-                override fun onStopScan() {
-                    Log.d(TAG, "Scanning: onStopScan: ")
-                    trySend(ScanResult.Stopped)
-                }
-
-            })
-    }
-
-    override fun stopScanning() {
-        BluetoothService.getDefaultInstance().stopScan()
-    }*/
-
 
 
 

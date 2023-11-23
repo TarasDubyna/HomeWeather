@@ -11,7 +11,7 @@ import taras.du.bluetooth.model.data.DeviceDataModel
 import taras.du.bluetooth.service.ArduinoCommunication
 import taras.du.data.data_sourse.database.TickEntity
 import taras.du.domain.model.device.ArduinoSettings
-import taras.du.domain.model.device.Parameter
+import taras.du.domain.model.device.ParameterType
 import java.util.Date
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -23,10 +23,10 @@ class ArduinoDataSource @Inject constructor(
 
     override suspend fun getDeviceSettings(): Flow<ArduinoSettings> = callbackFlow {
         val parameters = mutableSetOf(
-            Parameter.TIME,
-            Parameter.STORAGE_FREE,
-            Parameter.STORAGE_TOTAL,
-            Parameter.FREQUENCY
+            ParameterType.TIME,
+            ParameterType.STORAGE_FREE,
+            ParameterType.STORAGE_TOTAL,
+            ParameterType.FREQUENCY
         )
 
         dataSender.receivedData().first { it.parameters.keys.containsAll(parameters) }.let {
