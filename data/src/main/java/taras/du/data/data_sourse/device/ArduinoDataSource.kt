@@ -5,8 +5,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import taras.du.bluetooth.model.GetRequest
+import taras.du.bluetooth.model.ReceivedMessageModel
+import taras.du.bluetooth.model.RequestMessageModel
+import taras.du.bluetooth.model.SendingDataResult
+import taras.du.bluetooth.model.SetRequest
 import taras.du.bluetooth.model.data.DeviceDataModel
 import taras.du.bluetooth.service.ArduinoCommunication
 import taras.du.data.data_sourse.database.TickEntity
@@ -23,19 +29,19 @@ class ArduinoDataSource @Inject constructor(
 
     override suspend fun getDeviceSettings(): Flow<ArduinoSettings> = callbackFlow {
         val parameters = mutableSetOf(
-            ParameterType.TIME,
-            ParameterType.STORAGE_FREE,
-            ParameterType.STORAGE_TOTAL,
-            ParameterType.FREQUENCY
-        )
+            ParameterType.DEVICE_TIME,
+            ParameterType.SD_TOTAL_SPACE,
+            ParameterType.SD_FREE_SPACE,
+            ParameterType.MEASUREMENT_FREQUENCY
+        ).map { it.shortName }.toSet()
 
-        dataSender.receivedData().first { it.parameters.keys.containsAll(parameters) }.let {
-            it
-            trySend()
-        }
-
+        val request = GetRequest(parameters)
         CoroutineScope(Dispatchers.IO).launch {
-            dataSender.sendData(DeviceDataModel(parameters))
+            dataSender.sendData(request).collect { result ->
+                if (result is SendingDataResult.Successful) {
+                    result.receivedMessageModel.
+                }
+            }
         }
     }
 

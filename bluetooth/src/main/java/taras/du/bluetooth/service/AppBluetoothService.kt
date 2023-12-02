@@ -13,11 +13,14 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import taras.du.bluetooth.BluetoothUtil
@@ -27,19 +30,16 @@ import taras.du.bluetooth.model.BluetoothException
 import taras.du.bluetooth.model.BluetoothOtherException
 import taras.du.bluetooth.model.BluetoothPermissionNotGrantedException
 import taras.du.bluetooth.model.SendingDataResult
-import taras.du.bluetooth.model.data.DeviceDataModel
+import taras.du.bluetooth.model.RequestMessageModel
+import taras.du.bluetooth.model.ReceivedMessageModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.jvm.Throws
 
-/*interface AppBluetoothService {
-    
-}*/
-
 @Singleton
 class AppBluetoothService @Inject constructor(
     @ApplicationContext private val appContext: Context
-): BluetoothDeviceConnection, ArduinoCommunication {
+) : BluetoothDeviceConnection, ArduinoCommunication {
 
     private val TAG = "BluetoothService"
 
@@ -53,13 +53,13 @@ class AppBluetoothService @Inject constructor(
         uuid = null
     }
 
-    private val _receivedData = MutableSharedFlow<DeviceDataModel>()
-    private val eventObserver: BluetoothEventObserver
+    private val _receivedData = MutableSharedFlow<ReceivedMessageModel>()
+    private val eventObserver: BluetoothServiceEventObserver
 
 
     init {
         BluetoothService.init(configuration)
-        eventObserver = BluetoothEventObserverImpl(BluetoothService.getDefaultInstance())
+        eventObserver = BluetoothServiceEventObserverImpl(BluetoothService.getDefaultInstance())
     }
 
     override fun connectionStatus(): StateFlow<BluetoothStatus> {
@@ -120,60 +120,54 @@ class AppBluetoothService @Inject constructor(
     }
 
 
-    override suspend fun sendData(sendingData: DeviceDataModel) = callbackFlow<SendingDataResult> {
-        try {
-            checkBluetoothExceptions()
+    override suspend fun sendData(request: RequestMessageModel): Flow<SendingDataResult> =
+        callbackFlow {
+            try {
+                checkBluetoothExceptions()
 
-            val message = sendingData.getRequestMessage()
-            launch(Dispatchers.IO) {
-                BluetoothWriter(BluetoothService.getDefaultInstance()).writeln(message)
-            }
-
-            Log.d(TAG, "sendData: SUCCESSFUL: <$message>")
-
-            val callback = object : BluetoothService.OnBluetoothEventCallback {
-                override fun onDataRead(buffer: ByteArray?, length: Int) {
-                    buffer?.let {buf ->
-                        val receivedMessage = String(buf)
-                        val receivedData = DeviceDataModel(receivedMessage)
-
-                        val isResponseContainsParameters = receivedData.parameters.all { param ->
-                            sendingData.parameters.map { it.type }.contains(param.type)
+                eventObserver.deviceResponse().filter { response ->
+                    when (response) {
+                        is ReceivedMessageModel.DeviceParameters -> {
+                            val filteredParameters = response.parameters.filterKeys {
+                                request.getRequestParameters().keys.contains(it)
+                            }
+                            filteredParameters.keys.containsAll(request.getRequestParameters().keys)
                         }
 
-                        if (isResponseContainsParameters) {
-                            Log.d(TAG, "sendData: RESPONSE: $receivedMessage")
-                            trySend(SendingDataResult.Successful(receivedData))
+                        is ReceivedMessageModel.Ticks -> {
+                            request.getRequestParameters().entries
+                                .firstOrNull { (it.key == "r_ticks" || it.key == "s_ticks") && it.value == "true" } != null
+                        }
+
+                        else -> {
+                            false
                         }
                     }
+                }.collect {
+                    val sendingResult = SendingDataResult.Successful(it)
+                    trySend(sendingResult)
                 }
 
-                override fun onStatusChange(status: BluetoothStatus?) {}
+                val message = request.toString()
+                launch(Dispatchers.IO) {
+                    BluetoothWriter(BluetoothService.getDefaultInstance()).writeln(message)
+                }
+                Log.d(TAG, "sendData: SUCCESSFUL: <$message>")
 
-                override fun onDeviceName(deviceName: String?) {}
-
-                override fun onToast(message: String?) {}
-
-                override fun onDataWrite(buffer: ByteArray?) {}
-
+            } catch (e: BluetoothException) {
+                Log.e(TAG, "sendData: FAILED: Bluetooth exception - ${e.message}")
+                trySend(SendingDataResult.Failed(e))
+            } catch (e: Exception) {
+                Log.e(TAG, "sendData: FAILED: Another exception - ${e.message}")
+                trySend(
+                    SendingDataResult.Failed(
+                        BluetoothOtherException(
+                            e.message ?: e.toString()
+                        )
+                    )
+                )
             }
-            BluetoothService.getDefaultInstance().setOnEventCallback(callback)
-
-        } catch (e: BluetoothException) {
-            Log.e(TAG, "sendData: FAILED: Bluetooth exception - ${e.message}")
-            trySend(SendingDataResult.Failed(e))
-        } catch (e: Exception) {
-            Log.e(TAG, "sendData: FAILED: Another exception - ${e.message}")
-            trySend(SendingDataResult.Failed(BluetoothOtherException(e.message?: e.toString())))
         }
-    }
-
-    override fun receivedData(): SharedFlow<DeviceDataModel> {
-        return _receivedData.shareIn(
-            scope = CoroutineScope(Dispatchers.Default),
-            started = SharingStarted.WhileSubscribed()
-        )
-    }
 
     @Throws(BluetoothException::class)
     private fun checkBluetoothExceptions() {
@@ -181,7 +175,6 @@ class AppBluetoothService @Inject constructor(
         if (!BluetoothUtil.isPermissionsGranted(appContext)) throw BluetoothPermissionNotGrantedException()
         if (BluetoothService.getDefaultInstance().status != BluetoothStatus.CONNECTED) throw BluetoothDeviceNotConnectedException()
     }
-
 
 
 }

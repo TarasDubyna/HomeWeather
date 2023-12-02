@@ -1,4 +1,4 @@
-package taras.du.bluetooth.model.scanning
+package taras.du.bluetooth.model
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

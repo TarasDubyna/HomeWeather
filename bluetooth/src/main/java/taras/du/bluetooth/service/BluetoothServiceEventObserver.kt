@@ -10,38 +10,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import taras.du.bluetooth.model.data.DeviceDataModel
+import taras.du.bluetooth.model.ReceivedMessageModel
 
-interface BluetoothEventObserver {
-    fun receivedData(): SharedFlow<DeviceDataModel>
+interface BluetoothServiceEventObserver {
+    fun deviceResponse(): SharedFlow<ReceivedMessageModel>
     fun connectionStatus(): StateFlow<BluetoothStatus>
 }
 
-class BluetoothEventObserverImpl(service: BluetoothService): BluetoothEventObserver {
+class BluetoothServiceEventObserverImpl(service: BluetoothService): BluetoothServiceEventObserver {
 
     private val TAG = "BluetoothEventObserver"
 
-    private val _receivedData: MutableSharedFlow<DeviceDataModel> = MutableSharedFlow()
+    private val _receivedData: MutableSharedFlow<ReceivedMessageModel> = MutableSharedFlow()
     private val _connectionStatus: MutableStateFlow<BluetoothStatus> = MutableStateFlow(BluetoothStatus.NONE)
 
     private val eventCallback = object : BluetoothService.OnBluetoothEventCallback {
         override fun onDataRead(buffer: ByteArray?, length: Int) {
-            buffer?.let {
-                val receivedData = DeviceDataModel.convert(buffer)
-                receivedData?.let {
-                    logReceivedData()
-                    _receivedData.tryEmit(it)
-                }
-
-            }
+            buffer?: return
+            val message = String(buffer)
+            val receivedData = ReceivedMessageModel.create(message)
+            _receivedData.tryEmit(receivedData)
         }
 
         override fun onStatusChange(status: BluetoothStatus?) {
             status?.let {
+                Log.d(TAG, "ConnectionStatus changed: ${it.name}")
                 _connectionStatus.tryEmit(it)
             }
         }
@@ -63,7 +60,7 @@ class BluetoothEventObserverImpl(service: BluetoothService): BluetoothEventObser
         service.setOnEventCallback(eventCallback)
     }
 
-    override fun receivedData(): SharedFlow<DeviceDataModel> {
+    override fun deviceResponse(): SharedFlow<ReceivedMessageModel> {
         return _receivedData
             .onEach { Log.d(TAG, "RECEIVED DATA: ${it.toString()}") }
             .shareIn(
@@ -73,7 +70,11 @@ class BluetoothEventObserverImpl(service: BluetoothService): BluetoothEventObser
     }
 
     override fun connectionStatus(): StateFlow<BluetoothStatus> {
-        return _connectionStatus.asStateFlow()
+        return _connectionStatus.stateIn(
+            scope = CoroutineScope(Dispatchers.Default),
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = BluetoothStatus.NONE)
+
     }
 
     private fun logReceivedData() {

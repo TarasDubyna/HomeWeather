@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import taras.du.bluetooth.model.scanning.ScanResult
-import taras.du.bluetooth.model.scanning.ScanningState
+import taras.du.bluetooth.model.ScanResult
+import taras.du.bluetooth.model.ScanningState
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds

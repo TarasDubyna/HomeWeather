@@ -1,4 +1,4 @@
-package taras.du.bluetooth.model.scanning
+package taras.du.bluetooth.model
 
 enum class ScanningState {
     STARTED,
