@@ -11,17 +11,13 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import taras.du.bluetooth.BluetoothUtil
 import taras.du.bluetooth.model.BluetoothNotEnabledException
@@ -29,9 +25,7 @@ import taras.du.bluetooth.model.BluetoothDeviceNotConnectedException
 import taras.du.bluetooth.model.BluetoothException
 import taras.du.bluetooth.model.BluetoothOtherException
 import taras.du.bluetooth.model.BluetoothPermissionNotGrantedException
-import taras.du.bluetooth.model.SendingDataResult
 import taras.du.bluetooth.model.RequestMessageModel
-import taras.du.bluetooth.model.ReceivedMessageModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.jvm.Throws

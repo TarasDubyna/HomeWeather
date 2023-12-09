@@ -13,3 +13,23 @@ DOMAIN
 
 PRESENTATION
 BLUETOOTH
+
+
+
+
+
+
+*** DEVICE MESSAGE ***
+
+REQUEST:
+<get:time,freq,sd_total,sd_free>
+
+<set:time,freq,sd_clear,sync,restart>
+- time: Long
+- freq: Int
+- sd_clear: Boolean (true)
+- sync: Boolean (true,false)
+- restart: Boolean(true)
+
+RESPONSE:
+"get:time=0123456789, freq = 60000"

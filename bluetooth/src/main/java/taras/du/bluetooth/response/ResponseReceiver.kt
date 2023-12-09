@@ -2,7 +2,6 @@ package taras.du.bluetooth.response
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import taras.du.bluetooth.model.ReceivedMessageModel
 import taras.du.bluetooth.service.AppBluetoothService
 
 class ResponseReceive(appBluetoothService: AppBluetoothService) {

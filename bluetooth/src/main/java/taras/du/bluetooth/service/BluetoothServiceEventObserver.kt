@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import taras.du.bluetooth.model.ReceivedMessageModel
 
 interface BluetoothServiceEventObserver {
     fun deviceResponse(): SharedFlow<ReceivedMessageModel>
