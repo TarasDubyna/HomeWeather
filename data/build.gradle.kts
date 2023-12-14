@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -48,20 +49,21 @@ android {
 
 dependencies {
 
-    implementation(project(mapOf("path" to ":domain", "path" to ":bluetooth")))
     implementation(project(mapOf("path" to ":domain")))
     project(":domain")
-    project(":bluetooth")
 
     val room_version = "2.6.0"
     val datastore_version = "1.0.0"
+    val bluetooth_version = "0.3.5"
     val hilt_version = "2.48.1"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
-    // Hilt DI
+
+// Hilt DI
     implementation("com.google.dagger:hilt-android:$hilt_version")
     ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
 
@@ -73,6 +75,9 @@ dependencies {
 
     // DataStore
     implementation ("androidx.datastore:datastore-preferences:$datastore_version")
+
+    // Bluetooth
+    implementation("com.github.douglasjunior.AndroidBluetoothLibrary:BluetoothClassicLibrary:$bluetooth_version")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

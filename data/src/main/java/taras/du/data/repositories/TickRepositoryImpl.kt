@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import taras.du.data.data_sourse.database.TickDao
-import taras.du.data.model.datastore.ArduinoSettingsModel
+import taras.du.data.model.DeviceSettingsModel
 import taras.du.domain.model.MeasurementTick
 import taras.du.domain.model.MeasurementType
 import taras.du.domain.model.Tick
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class TickRepositoryImpl @Inject constructor(
     private val tickDao: TickDao,
-    private val dataStore: DataStore<ArduinoSettingsModel>
+    private val dataStore: DataStore<DeviceSettingsModel>
 ) : TickRepository {
 
     private val TAG = "TickRepository"

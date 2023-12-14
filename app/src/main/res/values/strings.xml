@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">HomeWeather</string>
+    <string name="title_activity_device">DeviceActivity</string>
+    <string name="title_activity_measurement_parameter">MeasurementParameterActivity</string>
 </resources>

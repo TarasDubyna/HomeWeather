@@ -1,8 +1,10 @@
 package taras.du.domain.repository
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import taras.du.domain.model.device.SyncState
 
 interface SyncDeviceRepository {
-    suspend fun syncTicks(): Flow<Boolean>
+    suspend fun syncStoredTicks(): StateFlow<SyncState>
+    suspend fun syncDeviceSettings(): StateFlow<SyncState>
     //suspend fun syncDeviceInfo(): Flow<Map<Param, ParamValue>>
 }

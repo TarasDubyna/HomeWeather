@@ -38,7 +38,7 @@ dependencies {
 
     implementation(project(mapOf("path" to ":domain")))
     implementation(project(mapOf("path" to ":data")))
-    val bluetooth_version = "0.3.5"
+
     val hilt_version = "2.48.1"
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -47,6 +47,7 @@ dependencies {
     implementation("com.google.dagger:hilt-android:$hilt_version")
     ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
 
+    val bluetooth_version = "0.3.5"
     implementation("com.github.douglasjunior.AndroidBluetoothLibrary:BluetoothClassicLibrary:$bluetooth_version")
 
     testImplementation("junit:junit:4.13.2")

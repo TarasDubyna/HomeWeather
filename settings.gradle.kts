@@ -18,4 +18,3 @@ rootProject.name = "HomeWeather"
 include(":app")
 include(":domain")
 include(":data")
-include(":bluetooth")

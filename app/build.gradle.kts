@@ -63,6 +63,10 @@ android {
 
 dependencies {
 
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     val hilt_version = "2.48.1"
 
     implementation("androidx.core:core-ktx:1.9.0")

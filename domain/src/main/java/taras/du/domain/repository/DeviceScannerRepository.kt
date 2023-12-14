@@ -1,9 +1,13 @@
 package taras.du.domain.repository
 
-import kotlinx.coroutines.flow.Flow
-import taras.du.bluetooth.model.scanning.ScanResult
+import android.bluetooth.BluetoothDevice
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import taras.du.domain.model.device.ScanningState
+import kotlin.time.Duration
 
 interface DeviceScannerRepository {
-    fun startScanning(): Flow<taras.du.bluetooth.model.scanning.ScanResult>
+    fun scanningState(): StateFlow<ScanningState>
+    fun startScanning(timeout: Duration): SharedFlow<BluetoothDevice>
     fun stopScanning()
 }
