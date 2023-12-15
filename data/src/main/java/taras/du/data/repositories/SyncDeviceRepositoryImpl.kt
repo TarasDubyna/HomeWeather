@@ -1,15 +1,9 @@
 package taras.du.data.repositories
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import taras.du.data.data_sourse.database.TickDao
 import taras.du.data.data_sourse.datastore.DeviceParamsDataStore
 import taras.du.data.data_sourse.device.DeviceDataSource
-import taras.du.domain.model.DeviceParam
-import taras.du.domain.model.ParamValue
 import taras.du.domain.model.device.SyncState
 import taras.du.domain.repository.SyncDeviceRepository
 import javax.inject.Inject
