@@ -11,10 +11,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import taras.du.domain.model.device.DeviceSettings
 import taras.du.domain.model.device.DeviceState
 import taras.du.domain.repository.DeviceRepository
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DeviceRepositoryImpl(@ApplicationContext private val appContext: Context): DeviceRepository {
+class DeviceRepositoryImpl @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    private val dataStore: ): DeviceRepository {
 
 
     private val _deviceState: MutableStateFlow<DeviceState> = MutableStateFlow(DeviceState.NOT_CONNECTED)

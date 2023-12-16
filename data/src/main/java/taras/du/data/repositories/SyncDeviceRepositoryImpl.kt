@@ -2,7 +2,7 @@ package taras.du.data.repositories
 
 import kotlinx.coroutines.flow.StateFlow
 import taras.du.data.data_sourse.database.TickDao
-import taras.du.data.data_sourse.datastore.DeviceParamsDataStore
+import taras.du.data.data_sourse.datastore.DeviceDataStore
 import taras.du.data.data_sourse.device.DeviceDataSource
 import taras.du.domain.model.device.SyncState
 import taras.du.domain.repository.SyncDeviceRepository
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class SyncDeviceRepositoryImpl @Inject constructor(
     private val deviceDataSource: DeviceDataSource,
     private val tickDao: TickDao,
-    private val deviceParamsDataStore: DeviceParamsDataStore
+    private val deviceDataStore: DeviceDataStore
 ): SyncDeviceRepository {
 
     override suspend fun syncStoredTicks(): StateFlow<SyncState> {

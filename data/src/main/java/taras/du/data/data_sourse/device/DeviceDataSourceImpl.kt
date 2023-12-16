@@ -45,8 +45,10 @@ class DeviceDataSourceImpl : DeviceDataSource {
                 Log.d(TAG, "NEW BLUETOOTH STATUS: ${status.name}")
                 when(status){
                     BluetoothStatus.CONNECTED -> _deviceState.tryEmit(DeviceState.CONNECTED)
-                    BluetoothStatus.CONNECTING -> _deviceState.tr
-                    BluetoothStatus.NONE -> TODO()
+                    BluetoothStatus.CONNECTING -> _deviceState.tryEmit(DeviceState.CONNECTING)
+                    BluetoothStatus.NONE -> {
+
+                    }
                 }
             }
 
