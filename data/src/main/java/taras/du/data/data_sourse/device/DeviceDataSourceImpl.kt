@@ -26,9 +26,6 @@ class DeviceDataSourceImpl : DeviceDataSource {
 
     private val TAG = "DeviceDataSource"
 
-    private val _deviceState: MutableStateFlow<DeviceState> = MutableStateFlow(DeviceState.NOT_CONNECTED)
-    override val deviceState: StateFlow<DeviceState> = _deviceState
-
     private val responseFlow: MutableSharedFlow<String> = MutableSharedFlow()
 
     init {

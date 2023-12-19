@@ -49,7 +49,6 @@ android {
 
 dependencies {
 
-    implementation(project(mapOf("path" to ":domain")))
     project(":domain")
 
     val room_version = "2.6.0"

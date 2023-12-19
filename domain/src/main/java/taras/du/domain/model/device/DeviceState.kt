@@ -1,8 +1,8 @@
 package taras.du.domain.model.device
 
 enum class DeviceState {
-    NOT_CONNECTED,
+    DISCONNECTED,
     CONNECTING,
     CONNECTED,
-    DISCONNECTED
+    NOT_PAIRED
 }

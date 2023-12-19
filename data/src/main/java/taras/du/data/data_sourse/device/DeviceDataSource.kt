@@ -9,7 +9,6 @@ import taras.du.domain.model.device.DeviceState
 import taras.du.domain.model.tick.Tick
 
 interface DeviceDataSource {
-    val deviceState: StateFlow<DeviceState>
     suspend fun getDeviceParams(params: Set<String>): Flow<Map<String,String>>
     suspend fun setDeviceParams(params: Map<String, String>): Flow<Map<String,String>>
     suspend fun getStoredTicks(): SharedFlow<List<DeviceTicksModel>>
